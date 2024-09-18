@@ -9,7 +9,7 @@ DEFAULT_HEADERS = {
     "Authorization": OAUTH_TOKEN,
     "Accept": "application/json"
 }
-DEFAULT_PATH = "disk:/Приложения/TestForMycego"
+DEFAULT_PATH = "disk:/Приложения/TestForMycego/"
 
 
 def api_request(url, method='GET', params=None, headers=None):
@@ -32,24 +32,39 @@ def api_request(url, method='GET', params=None, headers=None):
         return None
 
 
-def get_public_key():
+def get_public_key(path) -> str:
+    """
+
+    :param path: relative path to public folder
+    :return: Return public key. If return None then not published source.
+    """
     params = {
-        "path": DEFAULT_PATH,
+        "path": DEFAULT_PATH + f"{path}/" if path else DEFAULT_PATH,
         "fields": "public_key"
     }
-    return api_request(url=BASE_URL, method="GET", params=params, headers=DEFAULT_HEADERS)["public_key"]
+    response = api_request(url=BASE_URL, method="GET", params=params, headers=DEFAULT_HEADERS)
+
+    return response.get('public_key')
 
 
-def get_public_files(public_key: str):
-    return api_request(url=PUBLIC_BASE_URL, method="GET", params={"public_key": public_key},
+def get_public_files(public_key: str) -> list:
+    params = {
+        "public_key": public_key,
+    }
+    return api_request(url=PUBLIC_BASE_URL, method="GET", params=params,
                        headers=DEFAULT_HEADERS)['_embedded']['items']
 
 
-def index(request):
-    public_key = get_public_key()
-    data = get_public_files(public_key)
+def index(request, path=None):
+    if request.method == "POST":
+        pass
+
+    public_key = get_public_key(path)
+    if not public_key:
+        return render(request, "NotPublic.html")
+    data = {"items": get_public_files(public_key)}
+
+    if path:
+        data["backlink"] = 'localhost:8000'
+
     return render(request, "index.html", {"data": data})
-
-
-def download(request):
-    pass

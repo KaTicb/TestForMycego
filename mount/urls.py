@@ -1,8 +1,8 @@
-from django.urls import path
+from django.urls import path, re_path
 from .views import *
 
 app_name = "mount"
 urlpatterns = [
-    path("main", index, name="index"),
-    path("download", download, name="download"),
+    path("", index, name="index"),
+    re_path(r'^(?P<path>[^/]+)/$', index, name='index_slug'),
 ]

@@ -16,8 +16,8 @@
 <div class="d-flex align-items-center min-vh-100">
     <div class="container">
         <div class="row justify-content-center">
-            <div class="col-md-8 col-lg-8">
-                <form action="{% url 'mount:download' %}" method="POST">
+            <div class="col-md-10 col-lg-10">
+                <form action="" method="POST">
                     {% csrf_token %}
                     <table class="table table-striped">
                         <thead>
@@ -30,11 +30,23 @@
                         </tr>
                         </thead>
                         <tbody>
-                        {% for item in data %}
+                        {% if data.backlink %}
+                        <tr>
+                            <a href="{% url 'mount:index' data.backlink %}">../</a>
+                        </tr>
+                        {% endif %}
+                        {% for item in data.items %}
                         <tr>
                             <th scope="row">{{ forloop.counter }}</th>
-                            <td><input type="checkbox" id="item_{{ forloop.counter }}" name="item_{{ forloop.counter }}">
-                                <label for="item_{{ forloop.counter }}"> {{ item.name }}</label></td>
+                            <td><input type="checkbox" id="item_{{ forloop.counter }}" name="{{ item.name }}">
+                                <label for="item_{{ forloop.counter }}">
+                                    {% if item.type == "dir" %}
+                                    <a href="{% url 'mount:index_slug' item.name %}">{{ item.name }}</a>
+                                    {% else %}
+                                    {{ item.name }}
+                                    {% endif %}
+                                </label>
+                            </td>
                             <td>{{ item.created }}</td>
                             <td>{{ item.modified }}</td>
                             <!--                        <td>#</td>-->
@@ -42,7 +54,8 @@
                         {% endfor %}
                         </tbody>
                     </table>
-                    <button type="submit" class="btn btn-primary">Download</button></form>
+                    <button type="submit" class="btn btn-primary">Download</button>
+                </form>
             </div>
         </div>
     </div>
